@@ -1,3 +1,4 @@
+//git ke liye bakchodi
 function showRegister(){
 
     document.getElementById("loginForm").classList.remove("active");
