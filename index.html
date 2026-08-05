@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College ERP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="left-panel">
+        <h1>College ERP</h1>
+        <p>Student Portal</p>
+
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="Student">
+    </div>
+
+    <div class="right-panel">
+
+        <!-- Login Form -->
+        <div id="loginForm" class="form-box active">
+
+            <h2>Student Login</h2>
+
+            <form>
+
+                <input type="email" id="loginEmail" placeholder="College Email" required>
+
+                <input type="password" id="loginPassword" placeholder="Password" required>
+
+                <button type="submit">Login</button>
+
+            </form>
+
+            <p>Don't have an account?
+                <span onclick="showRegister()">Register</span>
+            </p>
+
+        </div>
+
+
+        <!-- Registration Form -->
+
+        <div id="registerForm" class="form-box">
+
+            <h2>Student Registration</h2>
+
+            <form>
+
+                <input type="text" id="name" placeholder="Full Name" required>
+
+                <input type="text" id="roll" placeholder="Roll Number" required>
+
+                <input type="email" id="email" placeholder="College Email" required>
+
+                <input type="text" id="branch" placeholder="Branch" required>
+
+                <input type="password" id="password" placeholder="Password" required>
+
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+
+                <button type="submit">Register</button>
+
+            </form>
+
+            <p>Already have an account?
+                <span onclick="showLogin()">Login</span>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
