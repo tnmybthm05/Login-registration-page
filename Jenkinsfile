@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -16,16 +15,26 @@ pipeline {
 
         stage('Install') {
             steps {
-                bat 'npm install'
+                script {
+                    if (isUnix()) {
+                        sh 'npm install'
+                    } else {
+                        bat 'npm install'
+                    }
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'npm test'
+                script {
+                    if (isUnix()) {
+                        sh 'npm test'
+                    } else {
+                        bat 'npm test'
+                    }
+                }
             }
         }
-
     }
-
 }
