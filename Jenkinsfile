@@ -26,15 +26,12 @@ pipeline {
         }
 
         stage('Run Tests') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'npm test'
-                    } else {
-                        bat 'npm test'
-                    }
-                }
-            }
-        }
+    steps {
+        sh '''
+            chmod +x node_modules/.bin/jest
+            npm test
+        '''
+    }
+}
     }
 }
