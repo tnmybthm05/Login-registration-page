@@ -62,7 +62,8 @@ describe("College ERP - Login and Registration Tests", () => {
 
         if (fs.existsSync(filePath)) {
             const data = fs.readFileSync(filePath, "utf8");
-            student = JSON.parse(data);
+            const parsed = JSON.parse(data);
+            student = Array.isArray(parsed) ? parsed[0] : parsed;
         }
 
     });
