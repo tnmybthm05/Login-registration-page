@@ -2,9 +2,25 @@
   {
     "name": "Tanmay Batham",
     "roll": "101",
-    "email": "student@college.com",
+    "email": "b240369@skit.ac.in",
     "mobile": "9876543210",
     "branch": "Computer Science",
-    "password": "123456"
+    "password": "Password@123"
+  },
+  {
+    "name": "HARSHIT KUMAWAT",
+    "roll": "736",
+    "email": "b240550@skit.ac.in",
+    "mobile": "8949296065",
+    "branch": "cse",
+    "password": "Password@736"
+  },
+  {
+    "name": "HARSHIT KUMAWAT",
+    "roll": "736",
+    "email": "b240551@skit.ac.in",
+    "mobile": "8949296065",
+    "branch": "CSE",
+    "password": "Batham@123"
   }
 ]

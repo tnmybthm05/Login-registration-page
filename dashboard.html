@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College ERP - Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Top Navigation Bar -->
+    <header class="dash-navbar">
+        <div class="dash-nav-container">
+            <div class="dash-brand">
+                <img src="skit_logo.png" alt="College ERP Logo" class="dash-logo">
+                <div class="brand-text">
+                    <h2>College ERP</h2>
+                    <p class="dash-subbrand">Swami Keshvanand Institute of Technology (SKIT)</p>
+                </div>
+            </div>
+            <div class="dash-nav-user">
+                <div class="user-avatar-badge">
+                    <span id="userInitial">S</span>
+                </div>
+                <div class="user-meta">
+                    <span class="user-greeting-name" id="navUserName">Student</span>
+                    <span class="user-status-pill">● Active</span>
+                </div>
+                <button type="button" class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="dash-main-container">
+
+        <!-- Welcome Hero Banner -->
+        <section class="welcome-banner">
+            <div class="welcome-content">
+                <h1 class="welcome-heading">Welcome to College ERP "<span id="studentName">Student</span>"!</h1>
+                <p class="welcome-subtitle">Student Information & Academic Portal</p>
+            </div>
+            <div class="welcome-badge">
+                <span>Academic Session 2024–2025</span>
+            </div>
+        </section>
+
+        <!-- Information Dashboard Grid -->
+        <div class="dash-grid">
+
+            <!-- Profile Summary Card -->
+            <div class="dash-card profile-card">
+                <div class="profile-header">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="Student Avatar" class="profile-avatar">
+                    <h3 id="cardStudentName">Student Name</h3>
+                    <p class="profile-roll" id="cardRollBadge">Roll No: -</p>
+                    <span class="badge-status">Enrolled Student</span>
+                </div>
+                <div class="profile-quick-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">Institute</span>
+                        <span class="stat-value">SKIT Jaipur</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Degree</span>
+                        <span class="stat-value">B.Tech</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Student Information Card -->
+            <div class="dash-card details-card">
+                <div class="card-title-bar">
+                    <h3>Student Information</h3>
+                    <span class="portal-tag">Official ERP Record</span>
+                </div>
+
+                <div class="details-table">
+                    <div class="detail-item">
+                        <div class="detail-label">Full Name:</div>
+                        <div class="detail-value" id="infoName">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">College Email:</div>
+                        <div class="detail-value" id="infoEmail">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Roll Number:</div>
+                        <div class="detail-value" id="infoRoll">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Branch / Department:</div>
+                        <div class="detail-value" id="infoBranch">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Mobile Number:</div>
+                        <div class="detail-value" id="infoMobile">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">College / Institute:</div>
+                        <div class="detail-value">Swami Keshvanand Institute of Technology (SKIT)</div>
+                    </div>
+                </div>
+
+                <div class="card-footer-actions">
+                    <button type="button" class="btn-primary-action" onclick="window.print()">Print Information</button>
+                    <button type="button" class="btn-secondary-action" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+<script>
+    async function loadUserData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let name = urlParams.get("name");
+        let email = urlParams.get("email");
+        let roll = urlParams.get("roll");
+        let branch = urlParams.get("branch");
+        let mobile = urlParams.get("mobile");
+
+        let user = null;
+        try {
+            const stored = sessionStorage.getItem("loggedInUser");
+            if (stored) {
+                user = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error("Failed to parse loggedInUser from sessionStorage:", e);
+        }
+
+        if (user) {
+            name = user.name || name;
+            email = user.email || email;
+            roll = user.roll || roll;
+            branch = user.branch || branch;
+            mobile = user.mobile || mobile;
+        }
+
+        // If details are incomplete, attempt to fetch from backend or students.json
+        if ((!roll || !branch || !mobile) && (email || name)) {
+            try {
+                const resp = await fetch("/api/students");
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const list = data.students || (Array.isArray(data) ? data : []);
+                    const found = list.find(s =>
+                        (email && s.email && s.email.toLowerCase() === email.toLowerCase()) ||
+                        (name && s.name && s.name.toLowerCase() === name.toLowerCase())
+                    );
+                    if (found) {
+                        name = found.name || name;
+                        email = found.email || email;
+                        roll = found.roll || roll;
+                        branch = found.branch || branch;
+                        mobile = found.mobile || mobile;
+                    }
+                }
+            } catch (e) {
+                // Static offline fallback
+            }
+        }
+
+        if (!name) name = "Student";
+
+        // Update greeting and labels
+        document.getElementById("studentName").textContent = name;
+        document.getElementById("navUserName").textContent = name;
+        document.getElementById("cardStudentName").textContent = name;
+        document.getElementById("infoName").textContent = name;
+        document.getElementById("userInitial").textContent = name.charAt(0).toUpperCase();
+
+        if (email) document.getElementById("infoEmail").textContent = email;
+        if (roll) {
+            document.getElementById("infoRoll").textContent = roll;
+            document.getElementById("cardRollBadge").textContent = `Roll No: ${roll}`;
+        }
+        if (branch) document.getElementById("infoBranch").textContent = branch;
+        if (mobile) document.getElementById("infoMobile").textContent = mobile;
+    }
+
+    function logout() {
+        try {
+            sessionStorage.removeItem("loggedInUser");
+        } catch (e) {}
+        window.location.href = "index.html";
+    }
+
+    window.addEventListener("DOMContentLoaded", loadUserData);
+</script>
+
+</body>
+</html>

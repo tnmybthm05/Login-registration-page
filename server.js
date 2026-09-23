@@ -147,17 +147,22 @@ const server = http.createServer(async (req, res) => {
                 });
             }
 
-            if (!email.includes("@")) {
+            const EMAIL_REGEX = /^b\d+@skit\.ac\.in$/i;
+            if (!EMAIL_REGEX.test((email || "").trim())) {
                 return sendJson(res, 400, {
                     success: false,
-                    message: "Invalid email format."
+                    message: "Email must be in the format 'b<digits>@skit.ac.in' (e.g. b240369@skit.ac.in)."
                 });
             }
 
-            if (password.length < 6) {
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasDigit = /\d/.test(password);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
+            if (password.length < 8 || !hasUpper || !hasLower || !hasDigit || !hasSpecial) {
                 return sendJson(res, 400, {
                     success: false,
-                    message: "Password must be at least 6 characters long."
+                    message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character."
                 });
             }
 
@@ -210,6 +215,14 @@ const server = http.createServer(async (req, res) => {
                 });
             }
 
+            const EMAIL_REGEX = /^b\d+@skit\.ac\.in$/i;
+            if (!EMAIL_REGEX.test(email.trim())) {
+                return sendJson(res, 400, {
+                    success: false,
+                    message: "Email must be in the format 'b<digits>@skit.ac.in' (e.g. b240369@skit.ac.in)."
+                });
+            }
+
             const students = readStudentsFile();
             const matchedStudent = students.find(s => s.email.toLowerCase() === email.toLowerCase() && s.password === password);
 
@@ -227,7 +240,8 @@ const server = http.createServer(async (req, res) => {
                     name: matchedStudent.name,
                     email: matchedStudent.email,
                     roll: matchedStudent.roll,
-                    branch: matchedStudent.branch
+                    branch: matchedStudent.branch,
+                    mobile: matchedStudent.mobile
                 }
             });
         } catch (err) {
@@ -243,6 +257,8 @@ const server = http.createServer(async (req, res) => {
     let safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, "");
     if (safePath === "/" || safePath === "\\") {
         safePath = "/index.html";
+    } else if (safePath === "/dashboard" || safePath === "\\dashboard") {
+        safePath = "/dashboard.html";
     }
 
     const fullPath = path.join(__dirname, safePath);

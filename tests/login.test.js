@@ -164,4 +164,53 @@ describe("College ERP - Login and Registration Tests", () => {
 
     });
 
+
+    // ==========================================
+    // DASHBOARD TESTS
+    // ==========================================
+
+    test("TC-16: dashboard.html file exists", () => {
+
+        const filePath = path.join(__dirname, "..", "dashboard.html");
+
+        expect(fs.existsSync(filePath)).toBe(true);
+
+    });
+
+
+    test("TC-17: dashboard.html contains welcome message structure", () => {
+
+        const filePath = path.join(__dirname, "..", "dashboard.html");
+        const content = fs.readFileSync(filePath, "utf8");
+
+        expect(content).toContain("Welcome to College ERP");
+        expect(content).toContain("studentName");
+
+    });
+
+
+    test("TC-18: dashboard.html contains student information display fields", () => {
+
+        const filePath = path.join(__dirname, "..", "dashboard.html");
+        const content = fs.readFileSync(filePath, "utf8");
+
+        expect(content).toContain("infoName");
+        expect(content).toContain("infoEmail");
+        expect(content).toContain("infoRoll");
+        expect(content).toContain("infoBranch");
+        expect(content).toContain("infoMobile");
+
+    });
+
+
+    test("TC-19: dashboard.html contains logout button and action", () => {
+
+        const filePath = path.join(__dirname, "..", "dashboard.html");
+        const content = fs.readFileSync(filePath, "utf8");
+
+        expect(content).toContain("logout()");
+        expect(content).toContain("sessionStorage");
+
+    });
+
 });

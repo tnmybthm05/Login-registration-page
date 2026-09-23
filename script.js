@@ -13,19 +13,61 @@ function showLogin() {
     }
 }
 
+// Email format validation: "b<digits>@skit.ac.in" ('b' constant followed by digits)
+function validateEmail(email) {
+    if (!email || typeof email !== "string") {
+        return { valid: false, error: "Email is required." };
+    }
+    const cleanEmail = email.trim();
+    const emailRegex = /^b\d+@skit\.ac\.in$/i;
+    if (!emailRegex.test(cleanEmail)) {
+        return {
+            valid: false,
+            error: "Email must be in the format 'b<digits>@skit.ac.in' (e.g. b240369@skit.ac.in)."
+        };
+    }
+    return { valid: true };
+}
+
+// Google-style password validation:
+// Minimum 8 characters, with uppercase, lowercase, number, and special character
+function validatePassword(password) {
+    if (!password || typeof password !== "string") {
+        return { valid: false, error: "Password is required." };
+    }
+    if (password.length < 8) {
+        return { valid: false, error: "Password must be at least 8 characters long." };
+    }
+    if (!/[A-Z]/.test(password)) {
+        return { valid: false, error: "Password must contain at least one uppercase letter (A-Z)." };
+    }
+    if (!/[a-z]/.test(password)) {
+        return { valid: false, error: "Password must contain at least one lowercase letter (a-z)." };
+    }
+    if (!/\d/.test(password)) {
+        return { valid: false, error: "Password must contain at least one digit (0-9)." };
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password)) {
+        return { valid: false, error: "Password must contain at least one special character (e.g. !@#$%^&*)." };
+    }
+    return { valid: true };
+}
+
 // Validation Helper
 function validateStudent(student) {
     if (!student || !student.name || typeof student.name !== "string" || !student.name.trim()) {
         return { valid: false, error: "Name is required." };
     }
-    if (!student.email || !student.email.includes("@")) {
-        return { valid: false, error: "Valid email is required." };
+    const emailValidation = validateEmail(student.email);
+    if (!emailValidation.valid) {
+        return emailValidation;
     }
     if (student.mobile && student.mobile.toString().length !== 10) {
         return { valid: false, error: "Mobile number must be 10 digits." };
     }
-    if (!student.password || student.password.length < 6) {
-        return { valid: false, error: "Password must be at least 6 characters long." };
+    const passwordValidation = validatePassword(student.password);
+    if (!passwordValidation.valid) {
+        return passwordValidation;
     }
     return { valid: true };
 }
@@ -141,6 +183,12 @@ if (typeof document !== "undefined") {
                 return;
             }
 
+            const emailCheck = validateEmail(email);
+            if (!emailCheck.valid) {
+                alert(emailCheck.error);
+                return;
+            }
+
             try {
                 const response = await fetch("/api/login", {
                     method: "POST",
@@ -151,13 +199,49 @@ if (typeof document !== "undefined") {
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    alert(`Login Successful! Welcome ${result.student ? result.student.name : ""}!`);
+                    const student = result.student || {};
+                    if (typeof sessionStorage !== "undefined") {
+                        sessionStorage.setItem("loggedInUser", JSON.stringify(student));
+                    }
+                    const params = new URLSearchParams({
+                        name: student.name || "",
+                        email: student.email || email,
+                        roll: student.roll || "",
+                        branch: student.branch || "",
+                        mobile: student.mobile || ""
+                    });
+                    window.location.href = `dashboard.html?${params.toString()}`;
                 } else {
                     alert(result.message || "Invalid credentials.");
                 }
             } catch (err) {
-                // Static file fallback
-                alert("Login Successful!");
+                // Static file fallback (e.g. file:/// protocol)
+                let matchedStudent = null;
+                try {
+                    const stored = localStorage.getItem("registeredStudents");
+                    if (stored) {
+                        const list = JSON.parse(stored);
+                        matchedStudent = list.find(s => s.email.toLowerCase() === email.toLowerCase() && s.password === password);
+                    }
+                } catch (e) {}
+
+                if (!matchedStudent) {
+                    const defaultName = email.includes("@") ? email.split("@")[0] : "Student";
+                    matchedStudent = { name: defaultName, email: email };
+                }
+
+                if (typeof sessionStorage !== "undefined") {
+                    sessionStorage.setItem("loggedInUser", JSON.stringify(matchedStudent));
+                }
+
+                const params = new URLSearchParams({
+                    name: matchedStudent.name || "",
+                    email: matchedStudent.email || email,
+                    roll: matchedStudent.roll || "",
+                    branch: matchedStudent.branch || "",
+                    mobile: matchedStudent.mobile || ""
+                });
+                window.location.href = `dashboard.html?${params.toString()}`;
             }
         });
     }
@@ -222,6 +306,8 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         showRegister,
         showLogin,
+        validateEmail,
+        validatePassword,
         validateStudent,
         saveStudentToJson,
         loadStudentsFromJson

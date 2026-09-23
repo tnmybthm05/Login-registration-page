@@ -27,7 +27,7 @@
 
             <form>
 
-                <input type="email" id="loginEmail" placeholder="College Email" required>
+                <input type="email" id="loginEmail" placeholder="College Email (e.g. b240369@skit.ac.in)" required pattern="[bB][0-9]+@skit\.ac\.in" title="Format: b<digits>@skit.ac.in">
 
                 <input type="password" id="loginPassword" placeholder="Password" required>
 
@@ -54,15 +54,15 @@
 
                 <input type="text" id="roll" placeholder="Roll Number" required>
 
-                <input type="email" id="email" placeholder="College Email" required>
+                <input type="email" id="email" placeholder="College Email (e.g. b240369@skit.ac.in)" required pattern="[bB][0-9]+@skit\.ac\.in" title="Format: b<digits>@skit.ac.in">
 
                 <input type="tel" id="mobile" placeholder="Mobile Number" required pattern="[0-9]{10}" maxlength="10">
 
                 <input type="text" id="branch" placeholder="Branch" required>
 
-                <input type="password" id="password" placeholder="Password" required>
+                <input type="password" id="password" placeholder="Password (Google-style: 8+ chars, upper, lower, number, symbol)" required minlength="8" title="At least 8 characters, with uppercase, lowercase, number, and special character">
 
-                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required minlength="8">
 
                 <button type="submit">Register</button>
 

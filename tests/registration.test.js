@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const {
+    validateEmail,
+    validatePassword,
     validateStudent,
     saveStudentToJson,
     loadStudentsFromJson
@@ -29,17 +31,83 @@ describe("Registration and Local JSON File Storage Tests", () => {
     });
 
     // ==========================================
-    // VALIDATION TESTS
+    // EMAIL FORMAT TESTS (b<digits>@skit.ac.in)
     // ==========================================
 
-    test("TC-REG-01: Valid student passes validation", () => {
+    test("TC-EMAIL-01: Valid format b240369@skit.ac.in passes email validation", () => {
+        const res = validateEmail("b240369@skit.ac.in");
+        expect(res.valid).toBe(true);
+    });
+
+    test("TC-EMAIL-02: Email without prefix 'b' fails validation", () => {
+        const res = validateEmail("240369@skit.ac.in");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/skit\.ac\.in/i);
+    });
+
+    test("TC-EMAIL-03: Email with non-digit characters after 'b' fails validation", () => {
+        const res = validateEmail("bABCDE@skit.ac.in");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/skit\.ac\.in/i);
+    });
+
+    test("TC-EMAIL-04: Non-skit domain fails validation", () => {
+        const res = validateEmail("b240369@gmail.com");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/skit\.ac\.in/i);
+    });
+
+    // ==========================================
+    // GOOGLE-STYLE PASSWORD TESTS
+    // ==========================================
+
+    test("TC-PASS-01: Valid Google-style password passes", () => {
+        const res = validatePassword("Password@123");
+        expect(res.valid).toBe(true);
+    });
+
+    test("TC-PASS-02: Password less than 8 chars fails", () => {
+        const res = validatePassword("Pass@1");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/8 characters/i);
+    });
+
+    test("TC-PASS-03: Password without uppercase fails", () => {
+        const res = validatePassword("password@123");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/uppercase/i);
+    });
+
+    test("TC-PASS-04: Password without lowercase fails", () => {
+        const res = validatePassword("PASSWORD@123");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/lowercase/i);
+    });
+
+    test("TC-PASS-05: Password without digit fails", () => {
+        const res = validatePassword("Password@abc");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/digit/i);
+    });
+
+    test("TC-PASS-06: Password without special character fails", () => {
+        const res = validatePassword("Password123");
+        expect(res.valid).toBe(false);
+        expect(res.error).toMatch(/special character/i);
+    });
+
+    // ==========================================
+    // OVERALL STUDENT VALIDATION TESTS
+    // ==========================================
+
+    test("TC-REG-01: Valid student with skit email and Google-style password passes", () => {
         const student = {
             name: "John Doe",
             roll: "CS101",
-            email: "john@college.com",
+            email: "b240369@skit.ac.in",
             mobile: "9876543210",
             branch: "CSE",
-            password: "secretpassword"
+            password: "Secret@Password1"
         };
         const res = validateStudent(student);
         expect(res.valid).toBe(true);
@@ -48,42 +116,20 @@ describe("Registration and Local JSON File Storage Tests", () => {
     test("TC-REG-02: Missing or empty name fails validation", () => {
         const student = {
             name: "",
-            email: "john@college.com",
-            password: "secretpassword"
+            email: "b240369@skit.ac.in",
+            password: "Secret@Password1"
         };
         const res = validateStudent(student);
         expect(res.valid).toBe(false);
         expect(res.error).toMatch(/name/i);
     });
 
-    test("TC-REG-03: Invalid email fails validation", () => {
+    test("TC-REG-03: Mobile number not equal to 10 digits fails validation", () => {
         const student = {
             name: "John Doe",
-            email: "notanemail",
-            password: "secretpassword"
-        };
-        const res = validateStudent(student);
-        expect(res.valid).toBe(false);
-        expect(res.error).toMatch(/email/i);
-    });
-
-    test("TC-REG-04: Password shorter than 6 characters fails validation", () => {
-        const student = {
-            name: "John Doe",
-            email: "john@college.com",
-            password: "123"
-        };
-        const res = validateStudent(student);
-        expect(res.valid).toBe(false);
-        expect(res.error).toMatch(/password/i);
-    });
-
-    test("TC-REG-05: Mobile number not equal to 10 digits fails validation", () => {
-        const student = {
-            name: "John Doe",
-            email: "john@college.com",
+            email: "b240369@skit.ac.in",
             mobile: "12345",
-            password: "secretpassword"
+            password: "Secret@Password1"
         };
         const res = validateStudent(student);
         expect(res.valid).toBe(false);
@@ -94,14 +140,14 @@ describe("Registration and Local JSON File Storage Tests", () => {
     // FILE STORAGE TESTS
     // ==========================================
 
-    test("TC-REG-06: Saves first registration into a new JSON file", () => {
+    test("TC-REG-04: Saves first registration into a new JSON file", () => {
         const student1 = {
             name: "Alice Smith",
             roll: "CS201",
-            email: "alice@college.com",
+            email: "b240201@skit.ac.in",
             mobile: "9123456780",
             branch: "IT",
-            password: "password123"
+            password: "Password@123"
         };
 
         const saved = saveStudentToJson(student1, testJsonFile);
@@ -111,29 +157,29 @@ describe("Registration and Local JSON File Storage Tests", () => {
 
         const loaded = loadStudentsFromJson(testJsonFile);
         expect(loaded).toHaveLength(1);
-        expect(loaded[0].email).toBe("alice@college.com");
+        expect(loaded[0].email).toBe("b240201@skit.ac.in");
         expect(loaded[0].roll).toBe("CS201");
         expect(loaded[0].mobile).toBe("9123456780");
         expect(loaded[0].branch).toBe("IT");
     });
 
-    test("TC-REG-07: Appends subsequent registrations to the same JSON file without data loss", () => {
+    test("TC-REG-05: Appends subsequent registrations to the same JSON file without data loss", () => {
         const student1 = {
             name: "Alice Smith",
             roll: "CS201",
-            email: "alice@college.com",
+            email: "b240201@skit.ac.in",
             mobile: "9123456780",
             branch: "IT",
-            password: "password123"
+            password: "Password@123"
         };
 
         const student2 = {
             name: "Bob Jones",
             roll: "CS202",
-            email: "bob@college.com",
+            email: "b240202@skit.ac.in",
             mobile: "9988776655",
             branch: "ECE",
-            password: "password456"
+            password: "Password@456"
         };
 
         saveStudentToJson(student1, testJsonFile);
@@ -143,18 +189,18 @@ describe("Registration and Local JSON File Storage Tests", () => {
         expect(loaded).toHaveLength(2);
         expect(loaded[0].name).toBe("Alice Smith");
         expect(loaded[1].name).toBe("Bob Jones");
-        expect(loaded[1].email).toBe("bob@college.com");
+        expect(loaded[1].email).toBe("b240202@skit.ac.in");
         expect(loaded[1].mobile).toBe("9988776655");
     });
 
-    test("TC-REG-08: Stored JSON file contains valid formatted JSON", () => {
+    test("TC-REG-06: Stored JSON file contains valid formatted JSON", () => {
         const student = {
             name: "Charlie Brown",
             roll: "CS203",
-            email: "charlie@college.com",
+            email: "b240203@skit.ac.in",
             mobile: "9812345678",
             branch: "Mechanical",
-            password: "charliepass"
+            password: "Password@789"
         };
 
         saveStudentToJson(student, testJsonFile);
